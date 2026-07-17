@@ -1,21 +1,19 @@
-version: 2.1　
+version: 2.1
 
 jobs:
   run_cisco_7200:
-    machine:
-      enabled: true
+    machine: true
     resource_class: iphonesekino-lab/eveng-test-susono
+
     steps:
       - checkout
 
       - run:
           name: Run Cisco 7200 Ansible Playbook
-          command: |
-            ansible-playbook playbooks/cisco-7200.yml
+          command: ansible-playbook playbooks/cisco-7200.yml
 
 workflows:
-  version 2
   eveng_setup:
     jobs:
-      - run_cisco_7200 
+      - run_cisco_7200
       
