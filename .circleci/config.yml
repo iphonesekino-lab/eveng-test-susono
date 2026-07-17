@@ -14,6 +14,7 @@ jobs:
             ansible-playbook playbooks/cisco-7200.yml
 
 workflows:
+  version 2
   eveng_setup:
     jobs:
       - run_cisco_7200 
