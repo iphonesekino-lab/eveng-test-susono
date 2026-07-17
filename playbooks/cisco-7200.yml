@@ -1,0 +1,19 @@
+---
+- name: Test Ansible on Susono Runner
+  hosts: localhost
+  connection: local
+  gather_facts: true
+
+  tasks:
+    - name: Display runner hostname
+      ansible.builtin.debug:
+        msg: "Ansible is running on {{ ansible_hostname }}"
+
+    - name: Display current date
+      ansible.builtin.command: date
+      register: date_result
+      changed_when: false
+
+    - name: Show current date
+      ansible.builtin.debug:
+        var: date_result.stdout
