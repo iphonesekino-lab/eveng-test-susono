@@ -11,7 +11,7 @@ jobs:
       - run:
           name: Run Cisco 7200 Ansible Playbook
           command: |
-  ansible-playbook -i inventory/hosts.ini playbooks/cisco-7200.yml
+            ansible-playbook -i inventory/hosts.ini playbooks/cisco-7200.yml
 
 workflows:
   eveng_setup:
