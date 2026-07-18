@@ -34,7 +34,21 @@
           unzip -p "{{ image_bin }}" > "{{ image_file }}"
       args:
         chdir: "{{ workdir }}"
-        creates: "{{ workdir }}/{{ image_file }}"
+      register: unzip_result
+      changed_when: unzip_result.rc in [0, 1]
+      failed_when: unzip_result.rc not in [0, 1]
+
+    - name: Check extracted Cisco 7200 image
+      ansible.builtin.stat:
+        path: "{{ workdir }}/{{ image_file }}"
+      register: extracted_image
+
+    - name: Verify extracted Cisco 7200 image
+      ansible.builtin.assert:
+        that:
+          - extracted_image.stat.exists
+          - extracted_image.stat.size > 0
+        fail_msg: "Cisco 7200 image extraction failed or created an empty file."
 
     - name: Copy extracted image to Dynamips directory
       ansible.builtin.copy:
