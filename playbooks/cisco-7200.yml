@@ -1,19 +1,53 @@
 ---
-- name: Test Ansible on Susono Runner
-  hosts: localhost
-  connection: local
-  gather_facts: true
+- name: Install Cisco 7200 image on EVE-NG
+  hosts: eve
+  become: true
+  gather_facts: false
+
+  vars:
+    workdir: /tmp/cisco7200
+    image_bin: c7200-advipservicesk9-mz.152-4.S5.bin
+    image_file: c7200-advipservicesk9-mz.152-4.S5.image
+
+    # 裾野Runner上のファイル
+    image_source: /opt/ansible/images/c7200-advipservicesk9-mz.152-4.S5.bin
+
+    # EVE-NG上の格納先
+    dynamips_dir: /opt/unetlab/addons/dynamips
 
   tasks:
-    - name: Display runner hostname
-      ansible.builtin.debug:
-        msg: "Ansible is running on {{ ansible_hostname }}"
+    - name: Create temporary work directory on EVE-NG
+      ansible.builtin.file:
+        path: "{{ workdir }}"
+        state: directory
+        mode: "0755"
 
-    - name: Display current date
-      ansible.builtin.command: date
-      register: date_result
-      changed_when: false
+    - name: Copy Cisco 7200 BIN file from Runner to EVE-NG
+      ansible.builtin.copy:
+        src: "{{ image_source }}"
+        dest: "{{ workdir }}/{{ image_bin }}"
+        mode: "0644"
 
-    - name: Show current date
-      ansible.builtin.debug:
-        var: date_result.stdout
+    - name: Extract Cisco 7200 image
+      ansible.builtin.shell:
+        cmd: >
+          unzip -p "{{ image_bin }}" > "{{ image_file }}"
+      args:
+        chdir: "{{ workdir }}"
+        creates: "{{ workdir }}/{{ image_file }}"
+
+    - name: Copy extracted image to Dynamips directory
+      ansible.builtin.copy:
+        src: "{{ workdir }}/{{ image_file }}"
+        dest: "{{ dynamips_dir }}/{{ image_file }}"
+        remote_src: true
+        mode: "0644"
+
+    - name: Remove temporary work directory
+      ansible.builtin.file:
+        path: "{{ workdir }}"
+        state: absent
+
+    - name: Fix EVE-NG permissions
+      ansible.builtin.command:
+        cmd: /opt/unetlab/wrappers/unl_wrapper -a fixpermissions
