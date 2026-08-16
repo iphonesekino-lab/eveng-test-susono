@@ -1,28 +1,28 @@
 version: 2.1
 
 jobs:
-  run_cisco_7200:
-    machine: true
-    resource_class: iphonesekino-lab/eveng-test-susono
+run_cisco_7200:
+  machine: true
+  resource_class: iphonesekino-lab/eveng-test-susono
 
-    steps:
-      - checkout
+  steps:
+    - checkout
 
-      - run:
-          name: Run Cisco 7200 Ansible Playbook
-          command: ansible-playbook playbooks/cisco-7200.yml
+    - run:
+        name: Run Cisco 7200 Ansible Playbook
+        command: ansible-playbook -i inventory/hosts.ini playbooks/cisco-7200.yml
 
 
-  run_cisco_3725:
-    machine: true
-    resource_class: iphonesekino-lab/eveng-test-susono
+run_cisco_3725:
+  machine: true
+  resource_class: iphonesekino-lab/eveng-test-susono
 
-    steps:
-      - checkout
+  steps:
+    - checkout
 
-      - run:
-          name: Run Cisco 3725 Ansible Playbook
-          command: ansible-playbook playbooks/cisco-3725.yml
+    - run:
+        name: Run Cisco 3725 Ansible Playbook
+        command: ansible-playbook -i inventory/hosts.ini playbooks/cisco-3725.yml
 
 
   run_fortigate:
