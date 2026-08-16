@@ -77,10 +77,11 @@ workflows:
       - run_paloalto:
           requires:
             - run_fortigate
-# 以降は、paloaltoの動作確認後に有効化
-#      - run_juniper_vSRX:
-#          requires:
-#            - run_paloalto
+
+      - run_juniper_vSRX:
+          requires:
+            - run_paloalto
+
 
 
 

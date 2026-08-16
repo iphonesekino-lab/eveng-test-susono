@@ -1,0 +1,46 @@
+---
+- name: Install Juniper vSRX image on EVE-NG
+  hosts: eve
+  become: true
+  gather_facts: false
+
+  vars:
+    image_file: junos-media-vsrx-x86-64-vmdisk-19.1R3.9.qcow2
+
+    # Runner側のJuniper vSRXイメージ
+    image_source: /opt/ansible/images/junos-media-vsrx-x86-64-vmdisk-19.1R3.9.qcow2
+
+    # EVE-NG側の格納先
+    vsrx_dir: /opt/unetlab/addons/qemu/vsrxng-19.1R3.9
+
+    # EVE-NGで使用するファイル名
+    eve_image: virtioa.qcow2
+
+  tasks:
+    - name: Create Juniper vSRX image directory on EVE-NG
+      ansible.builtin.file:
+        path: "{{ vsrx_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Copy Juniper vSRX QCOW2 image from Runner to EVE-NG
+      ansible.builtin.copy:
+        src: "{{ image_source }}"
+        dest: "{{ vsrx_dir }}/{{ eve_image }}"
+        mode: "0644"
+
+    - name: Check Juniper vSRX image
+      ansible.builtin.stat:
+        path: "{{ vsrx_dir }}/{{ eve_image }}"
+      register: vsrx_image
+
+    - name: Verify Juniper vSRX image
+      ansible.builtin.assert:
+        that:
+          - vsrx_image.stat.exists
+          - vsrx_image.stat.size > 0
+        fail_msg: "Juniper vSRX image copy failed or virtioa.qcow2 is empty."
+
+    - name: Fix EVE-NG permissions
+      ansible.builtin.command:
+        cmd: /opt/unetlab/wrappers/unl_wrapper -a fixpermissions
