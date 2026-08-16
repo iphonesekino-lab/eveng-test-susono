@@ -9,7 +9,7 @@
     image_bin: c3725-adventerprisek9-mz124-15.bin
     image_file: c3725-adventerprisek9-mz124-15.image
 
-    # 裾野Runner上のファイル
+    # 裾野Runner上のファイル 
     image_source: /opt/ansible/images/c3725-adventerprisek9-mz124-15.bin
 
     # EVE-NG上の格納先

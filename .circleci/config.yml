@@ -9,7 +9,7 @@ jobs:
       - checkout
 
       - run:
-          name: Run Cisco 7200 Ansible Playbook
+          name: Run Cisco 7200 Ansible Playbook 
           command: ansible-playbook playbooks/cisco-7200.yml
 
 
