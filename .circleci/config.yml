@@ -9,11 +9,11 @@ jobs:
       - checkout
 
       - run:
-          name: Run Cisco 7200 Ansible Playbook 
+          name: Run Cisco 7200 Ansible Playbook
           command: ansible-playbook playbooks/cisco-7200.yml
 
 
-  run_cisco_3750:
+  run_cisco_3725:
     machine: true
     resource_class: iphonesekino-lab/eveng-test-susono
 
@@ -21,8 +21,8 @@ jobs:
       - checkout
 
       - run:
-          name: Run Cisco 3750 Ansible Playbook
-          command: ansible-playbook playbooks/cisco-3750.yml
+          name: Run Cisco 3725 Ansible Playbook
+          command: ansible-playbook playbooks/cisco-3725.yml
 
 
   run_fortigate:
@@ -66,13 +66,13 @@ workflows:
     jobs:
       - run_cisco_7200
 
-      - run_cisco_3750:
+      - run_cisco_3725:
           requires:
             - run_cisco_7200
-# 最初はCisco3750だけやりたいので以下はコメントにしてあります。
+# 最初はCisco3725だけやりたいので以下はコメントにしてあります。
 #      - run_fortigate:
 #          requires:
-#            - run_cisco_3750
+#            - run_cisco_3725
 #
 #      - run_paloalto:
 #          requires:
@@ -81,4 +81,5 @@ workflows:
 #      - run_juniper_vSRX:
 #          requires:
 #            - run_paloalto
+
 
