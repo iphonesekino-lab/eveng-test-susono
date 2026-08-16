@@ -73,14 +73,15 @@ workflows:
       - run_fortigate:
           requires:
             - run_cisco_3725
-# 以降は、fortigateの動作確認後に有効化
-#      - run_paloalto:
-#          requires:
-#            - run_fortigate
-#
+
+      - run_paloalto:
+          requires:
+            - run_fortigate
+# 以降は、paloaltoの動作確認後に有効化
 #      - run_juniper_vSRX:
 #          requires:
 #            - run_paloalto
+
 
 
 

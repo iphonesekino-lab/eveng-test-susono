@@ -1,0 +1,46 @@
+---
+- name: Install Palo Alto image on EVE-NG
+  hosts: eve
+  become: true
+  gather_facts: false
+
+  vars:
+    image_file: PA-VM-ESX-9.0.4-disk1.qcow2
+
+    # Runner側のPalo Altoイメージ
+    image_source: /opt/ansible/images/PA-VM-ESX-9.0.4-disk1.qcow2
+
+    # EVE-NG側の格納先
+    paloalto_dir: /opt/unetlab/addons/qemu/paloalto-9.0.4
+
+    # EVE-NGで使用するファイル名
+    eve_image: virtioa.qcow2
+
+  tasks:
+    - name: Create Palo Alto image directory on EVE-NG
+      ansible.builtin.file:
+        path: "{{ paloalto_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Copy Palo Alto QCOW2 image from Runner to EVE-NG
+      ansible.builtin.copy:
+        src: "{{ image_source }}"
+        dest: "{{ paloalto_dir }}/{{ eve_image }}"
+        mode: "0644"
+
+    - name: Check Palo Alto image
+      ansible.builtin.stat:
+        path: "{{ paloalto_dir }}/{{ eve_image }}"
+      register: paloalto_image
+
+    - name: Verify Palo Alto image
+      ansible.builtin.assert:
+        that:
+          - paloalto_image.stat.exists
+          - paloalto_image.stat.size > 0
+        fail_msg: "Palo Alto image copy failed or virtioa.qcow2 is empty."
+
+    - name: Fix EVE-NG permissions
+      ansible.builtin.command:
+        cmd: /opt/unetlab/wrappers/unl_wrapper -a fixpermissions
