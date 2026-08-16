@@ -10,11 +10,75 @@ jobs:
 
       - run:
           name: Run Cisco 7200 Ansible Playbook
-          command: |
-            ansible-playbook -i inventory/hosts.ini playbooks/cisco-7200.yml
+          command: ansible-playbook playbooks/cisco-7200.yml
+
+
+  run_cisco_3750:
+    machine: true
+    resource_class: iphonesekino-lab/eveng-test-susono
+
+    steps:
+      - checkout
+
+      - run:
+          name: Run Cisco 3750 Ansible Playbook
+          command: ansible-playbook playbooks/cisco-3750.yml
+
+
+  run_fortigate:
+    machine: true
+    resource_class: iphonesekino-lab/eveng-test-susono
+
+    steps:
+      - checkout
+
+      - run:
+          name: Run FortiGate Ansible Playbook
+          command: ansible-playbook playbooks/fortigate.yml
+
+
+  run_paloalto:
+    machine: true
+    resource_class: iphonesekino-lab/eveng-test-susono
+
+    steps:
+      - checkout
+
+      - run:
+          name: Run Palo Alto Ansible Playbook
+          command: ansible-playbook playbooks/paloalto.yml
+
+
+  run_juniper_vSRX:
+    machine: true
+    resource_class: iphonesekino-lab/eveng-test-susono
+
+    steps:
+      - checkout
+
+      - run:
+          name: Run Juniper vSRX Ansible Playbook
+          command: ansible-playbook playbooks/juniper-vSRX.yml
+
 
 workflows:
   eveng_setup:
     jobs:
       - run_cisco_7200
-      
+
+      - run_cisco_3750:
+          requires:
+            - run_cisco_7200
+# 最初はCisco3750だけやりたいので以下はコメントにしてあります。
+#      - run_fortigate:
+#          requires:
+#            - run_cisco_3750
+#
+#      - run_paloalto:
+#          requires:
+#            - run_fortigate
+#
+#      - run_juniper_vSRX:
+#          requires:
+#            - run_paloalto
+

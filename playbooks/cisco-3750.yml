@@ -1,0 +1,67 @@
+---
+- name: Install Cisco 3750 image on EVE-NG
+  hosts: eve
+  become: true
+  gather_facts: false
+
+  vars:
+    workdir: /tmp/cisco3750
+    image_bin: c3725-adventerprisek9-mz124-15.bin
+    image_file: c3725-adventerprisek9-mz124-15.image
+
+    # 裾野Runner上のファイル
+    image_source: /opt/ansible/images/c3725-adventerprisek9-mz124-15.bin
+
+    # EVE-NG上の格納先
+    dynamips_dir: /opt/unetlab/addons/dynamips
+
+  tasks:
+    - name: Create temporary work directory on EVE-NG
+      ansible.builtin.file:
+        path: "{{ workdir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Copy Cisco 3750 BIN file from Runner to EVE-NG
+      ansible.builtin.copy:
+        src: "{{ image_source }}"
+        dest: "{{ workdir }}/{{ image_bin }}"
+        mode: "0644"
+
+    - name: Extract Cisco 3750 image
+      ansible.builtin.shell:
+        cmd: >
+          unzip -p "{{ image_bin }}" > "{{ image_file }}"
+      args:
+        chdir: "{{ workdir }}"
+      register: unzip_result
+      changed_when: unzip_result.rc in [0, 1]
+      failed_when: unzip_result.rc not in [0, 1]
+
+    - name: Check extracted Cisco 3750 image
+      ansible.builtin.stat:
+        path: "{{ workdir }}/{{ image_file }}"
+      register: extracted_image
+
+    - name: Verify extracted Cisco 3750 image
+      ansible.builtin.assert:
+        that:
+          - extracted_image.stat.exists
+          - extracted_image.stat.size > 0
+        fail_msg: "Cisco 3750 image extraction failed or created an empty file."
+
+    - name: Copy extracted image to Dynamips directory
+      ansible.builtin.copy:
+        src: "{{ workdir }}/{{ image_file }}"
+        dest: "{{ dynamips_dir }}/{{ image_file }}"
+        remote_src: true
+        mode: "0644"
+
+    - name: Remove temporary work directory
+      ansible.builtin.file:
+        path: "{{ workdir }}"
+        state: absent
+
+    - name: Fix EVE-NG permissions
+      ansible.builtin.command:
+        cmd: /opt/unetlab/wrappers/unl_wrapper -a fixpermissions
