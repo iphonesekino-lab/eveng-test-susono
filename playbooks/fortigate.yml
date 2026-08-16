@@ -1,0 +1,65 @@
+---
+- name: Install FortiGate image on EVE-NG
+  hosts: eve
+  become: true
+  gather_facts: false
+
+  vars:
+    image_zip: FGT_VM64_KVM-v6-build1879-FORTINET.out.kvm.zip
+
+    # Runner側
+    image_source: /opt/ansible/images/FGT_VM64_KVM-v6-build1879-FORTINET.out.kvm.zip
+
+    # EVE-NG側
+    fortigate_dir: /opt/unetlab/addons/qemu/fortinet-FGT-v6-build1879
+
+    extracted_image: fortios.qcow2
+    eve_image: virtioa.qcow2
+
+  tasks:
+    - name: Create FortiGate image directory on EVE-NG
+      ansible.builtin.file:
+        path: "{{ fortigate_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Copy FortiGate ZIP file from Runner to EVE-NG
+      ansible.builtin.copy:
+        src: "{{ image_source }}"
+        dest: "{{ fortigate_dir }}/{{ image_zip }}"
+        mode: "0644"
+
+    - name: Extract FortiGate image on EVE-NG
+      ansible.builtin.unarchive:
+        src: "{{ fortigate_dir }}/{{ image_zip }}"
+        dest: "{{ fortigate_dir }}"
+        remote_src: true
+
+    - name: Check extracted FortiGate image
+      ansible.builtin.stat:
+        path: "{{ fortigate_dir }}/{{ extracted_image }}"
+      register: fortios_image
+
+    - name: Verify extracted FortiGate image
+      ansible.builtin.assert:
+        that:
+          - fortios_image.stat.exists
+          - fortios_image.stat.size > 0
+        fail_msg: "fortios.qcow2 was not extracted correctly."
+
+    - name: Rename fortios.qcow2 to virtioa.qcow2
+      ansible.builtin.command:
+        cmd: >
+          mv "{{ fortigate_dir }}/{{ extracted_image }}"
+          "{{ fortigate_dir }}/{{ eve_image }}"
+      args:
+        creates: "{{ fortigate_dir }}/{{ eve_image }}"
+
+    - name: Remove FortiGate ZIP file from EVE-NG
+      ansible.builtin.file:
+        path: "{{ fortigate_dir }}/{{ image_zip }}"
+        state: absent
+
+    - name: Fix EVE-NG permissions
+      ansible.builtin.command:
+        cmd: /opt/unetlab/wrappers/unl_wrapper -a fixpermissions
